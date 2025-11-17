@@ -1,29 +1,153 @@
-AudioSense: End-to-End Environmental Sound Classification (ESC)AudioSense is a comprehensive machine learning system designed for the robust and accurate automated classification of environmental audio signals.The system leverages a Convolutional Neural Network (CNN) trained on Mel-spectrograms—a 2D, image-like representation of the audio signal—to automatically learn and identify complex acoustic patterns.This repository contains two primary components:backend/: The core ML pipeline, training utilities, and the prediction inference API.frontend/: The web-based CNN Visualizer interface for real-time classification and feature map inspection.🌟 FeaturesEnvironmental Sound Classification (ESC): Classifies audio into 50 distinct acoustic classes using the ESC-50 dataset standard.Mel-Spectrogram Feature Engineering: Automated conversion of raw audio waveforms into perceptually relevant 2D Mel-spectrograms.Hierarchical Feature Learning: Utilizes a CNN architecture optimized for extracting complex, hierarchical spatio-temporal features directly from the spectrogram images.Data Augmentation: Incorporates techniques such as time shifting, pitch shifting, and amplitude modulation to enhance model robustness and generalization.Inference Pipeline: Provides a low-latency mechanism to classify new, unlabeled audio samples.Model Visualizer (Frontend): Allows users to upload audio, receive a classification result, and potentially visualize the generated input spectrogram and the feature maps from the convolutional layers.📁 Project StructureThe repository is divided into two major folders reflecting the system's architecture:AudioSense/
-├── backend/                  # Machine Learning Pipeline & API
-│   ├── data/                 # Raw/Processed data storage (e.g., ESC-50)
-│   ├── models/               # Saved, trained CNN model weights (.h5)
-│   ├── code/
-│   │   ├── prep.py           # Data ingestion, feature extraction (Spectrograms)
-│   │   ├── model.py          # CNN Architecture definition
-│   │   ├── train.py          # Model training and optimization loop
-│   │   └── eval.py           # Performance evaluation and metrics generation
-│   ├── main.py               # Main CLI script (preprocess, train, eval)
-│   └── requirements.txt      # Python dependencies
-└── frontend/                 # Web Interface (CNN Visualizer)
-    ├── src/
-    ├── public/
-    └── package.json          # Frontend dependencies (e.g., React, Vue, JS)
-🚀 Setup & Installation1. Backend SetupThe backend is built primarily with Python and uses librosa for audio processing and Keras/TensorFlow for the model.Navigate to the backend directory:cd backend
-Create and activate a virtual environment (Recommended):python -m venv venv
-source venv/bin/activate  # On Windows, use: .\venv\Scripts\activate
-Install dependencies:pip install -r requirements.txt
-Data Preprocessing:Place the required audio dataset (e.g., ESC-50) into the data/ folder.Run the preprocessing script to convert raw audio into Mel-spectrogram features, which will be cached for faster training:python main.py preprocess
-Model Training:Train the CNN model. The best-performing weights will be saved in the models/ directory:python main.py train
-2. Frontend SetupThe frontend is a web application that consumes the backend API.Navigate to the frontend directory:cd ../frontend
-Install dependencies (Assuming Node.js and npm/yarn):npm install
-# or
-yarn install
-Run the application:npm start
-# or
-yarn start
-The frontend application should now be accessible in your web browser (typically at http://localhost:3000).🔧 EvaluationTo evaluate the trained model's performance on the hold-out test set, run the evaluation command from the backend/ directory:python main.py eval
+# 🎧 AudioSense – Environmental Sound Classification (ESC) using CNNs
+
+AudioSense is a complete machine-learning system for **classifying environmental sounds** using **Mel-spectrograms** and a **Convolutional Neural Network (CNN)**.  
+This repository contains **two folders**:
+
+- **backend/** → ML model, preprocessing, training pipeline & inference API  
+- **frontend/** → Web UI for uploading audio & viewing predictions  
+
+---
+
+## 🚀 Features
+
+- Converts raw audio (`.wav`) into **Mel-spectrograms**
+- Deep learning classification using a **CNN**
+- **ESC-50 (50 environmental classes)** support
+- Built-in audio **data augmentation** (time shift, pitch shift, amplitude scaling)
+- 5-Fold **cross-validation** compatible pipeline
+- FastAPI backend API for inference
+- React frontend for real-time predictions and visualization
+
+---
+
+## 📂 Project Structure
+
+```
+.
+├── backend/
+│   ├── src/
+│   │   ├── prep.py          # Audio loading + spectrogram extraction
+│   │   ├── model.py         # CNN architecture
+│   │   ├── train.py         # Training script
+│   │   ├── eval.py          # Evaluation
+│   │   └── main.py          # FastAPI inference server
+│   ├── requirements.txt
+│
+├── frontend/
+│   ├── src/
+│   ├── public/
+│   └── package.json
+│
+└── README.md
+```
+
+---
+
+## 🧠 Methodology Overview
+
+### 1️⃣ Audio Preprocessing  
+- Load audio (`.wav`)
+- Pad/trim to 5 seconds  
+- Convert to **Mel-spectrogram (128×Time)**  
+- Normalize to 0–1
+
+### 2️⃣ CNN Model Architecture  
+- 3 Convolutional blocks  
+- BatchNorm + MaxPooling  
+- Global Average Pooling  
+- Dense (256) + Dropout  
+- Output layer: `Softmax (50 classes)`
+
+### 3️⃣ Training  
+- Categorical Crossentropy  
+- Adam optimizer  
+- EarlyStopping + Checkpointing  
+- Optional data augmentation
+
+### 4️⃣ Inference  
+- FastAPI endpoint:  
+```
+POST /predict
+```
+- Returns:
+  - top class index  
+  - top-5 probabilities  
+
+---
+
+## ⚙️ Installation & Setup
+
+### **Backend Setup**
+```bash
+cd backend
+pip install -r requirements.txt
+uvicorn src.main:app --reload
+```
+API will run at:
+```
+http://localhost:8000
+```
+
+---
+
+### **Frontend Setup**
+```bash
+cd frontend
+npm install
+npm start
+```
+App will run at:
+```
+http://localhost:3000
+```
+
+---
+
+## 🔥 API Example Request
+```bash
+curl -X POST "http://localhost:8000/predict" \
+     -F "file=@example.wav"
+```
+
+Sample response:
+```json
+{
+  "prediction_index": 17,
+  "top5": [
+    {"index": 17, "probability": 0.92},
+    {"index": 4,  "probability": 0.03},
+    {"index": 12, "probability": 0.02}
+  ]
+}
+```
+
+---
+
+## 📊 Dataset
+This project uses the **ESC-50 Dataset** (50 classes, 2000 audio clips, 5-second each).
+
+---
+
+## 🛠️ Future Improvements
+- Real-time microphone input  
+- Multi-feature fusion (MFCC + Spectrogram)  
+- Larger audio datasets  
+- Model quantization for mobile deployment  
+
+---
+
+## 🤝 Contributing
+Pull requests are welcome!  
+If you'd like to improve training, augmentations, or UI, feel free to submit.
+
+---
+
+## 📜 License
+MIT License © 2025
+
+---
+
+## 👤 Author
+**Alaukik Patel**  
+VII Semester – CSE  
+IIIT Senapati, Manipur
